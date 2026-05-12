@@ -184,18 +184,29 @@ async function enterLobby() {
 
     currentPlayerId = localStorage.getItem("playerId");
 
+    currentPlayerId = localStorage.getItem("playerId");
+
     if (currentPlayerId) {
-        const { error } = await supabaseClient
+        const { data: updatedPlayer, error } = await supabaseClient
             .from("players")
             .update(playerData)
-            .eq("id", currentPlayerId);
+            .eq("id", currentPlayerId)
+            .select()
+            .maybeSingle();
 
         if (error) {
             console.error(error);
             alert("Erro ao atualizar jogador no lobby.");
             return;
         }
-    } else {
+
+        if (!updatedPlayer) {
+            localStorage.removeItem("playerId");
+            currentPlayerId = null;
+        }
+    }
+
+    if (!currentPlayerId) {
         const { data, error } = await supabaseClient
             .from("players")
             .insert(playerData)
