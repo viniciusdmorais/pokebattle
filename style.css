@@ -315,3 +315,35 @@ button:hover {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.attack-lunge {
+  animation: attackLunge 0.35s ease;
+}
+
+.damage-shake {
+  animation: damageShake 0.35s ease;
+}
+
+.battle-flash {
+  animation: battleFlash 0.25s ease;
+}
+
+@keyframes attackLunge {
+  0% { transform: translateX(0) scale(1.5); }
+  50% { transform: translateX(35px) scale(1.6); }
+  100% { transform: translateX(0) scale(1.5); }
+}
+
+@keyframes damageShake {
+  0% { transform: translateX(0) scale(1.2); }
+  25% { transform: translateX(-8px) scale(1.2); }
+  50% { transform: translateX(8px) scale(1.2); }
+  75% { transform: translateX(-5px) scale(1.2); }
+  100% { transform: translateX(0) scale(1.2); }
+}
+
+@keyframes battleFlash {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.8); }
+  100% { filter: brightness(1); }
+}

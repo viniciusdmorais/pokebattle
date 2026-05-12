@@ -709,7 +709,8 @@ async function useMove(move) {
 
         return;
     }
-
+    
+    playAttackAnimation();
     let newPlayer1Hp = currentBattle.player1_hp;
     let newPlayer2Hp = currentBattle.player2_hp;
 
@@ -1145,3 +1146,15 @@ window.addEventListener("beforeunload", () => {
 
     localStorage.clear();
 });
+
+function playAttackAnimation() {
+    playerPokemonSprite.classList.add("attack-lunge");
+    enemyPokemonSprite.classList.add("damage-shake");
+    battleScreen.classList.add("battle-flash");
+
+    setTimeout(() => {
+        playerPokemonSprite.classList.remove("attack-lunge");
+        enemyPokemonSprite.classList.remove("damage-shake");
+        battleScreen.classList.remove("battle-flash");
+    }, 400);
+}
