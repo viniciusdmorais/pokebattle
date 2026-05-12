@@ -1091,16 +1091,46 @@ async function finishBattleCleanup() {
 }
 
 window.addEventListener("beforeunload", () => {
-    const playerId = localStorage.getItem("playerId");
+
+    const playerId =
+        localStorage.getItem("playerId");
 
     if (!playerId) return;
 
-    fetch(`${SUPABASE_URL}/rest/v1/players?id=eq.${playerId}`, {
-        method: "DELETE",
-        keepalive: true,
-        headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`
+    const headers = {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`
+    };
+
+    // Remove convites
+    fetch(
+        `${SUPABASE_URL}/rest/v1/battle_invites?or=(from_player_id.eq.${playerId},to_player_id.eq.${playerId})`,
+        {
+            method: "DELETE",
+            keepalive: true,
+            headers
         }
-    });
+    );
+
+    // Remove batalhas
+    fetch(
+        `${SUPABASE_URL}/rest/v1/battles?or=(player1_id.eq.${playerId},player2_id.eq.${playerId})`,
+        {
+            method: "DELETE",
+            keepalive: true,
+            headers
+        }
+    );
+
+    // Remove player
+    fetch(
+        `${SUPABASE_URL}/rest/v1/players?id=eq.${playerId}`,
+        {
+            method: "DELETE",
+            keepalive: true,
+            headers
+        }
+    );
+
+    localStorage.clear();
 });
