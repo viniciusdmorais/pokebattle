@@ -294,7 +294,24 @@ button:hover {
   font-weight: bold;
 }
 
-#attackButton {
-  width: auto;
-  min-width: 120px;
+.moves-box {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  min-width: 260px;
+}
+
+.move-button {
+  padding: 10px;
+  border: 2px solid #222;
+  border-radius: 10px;
+  background: #ffcb05;
+  color: #222;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.move-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
