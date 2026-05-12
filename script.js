@@ -182,6 +182,8 @@ async function enterLobby() {
         team: playerTeam
     };
 
+    currentPlayerId = localStorage.getItem("playerId");
+    
     if (currentPlayerId) {
         const { error } = await supabaseClient
             .from("players")
