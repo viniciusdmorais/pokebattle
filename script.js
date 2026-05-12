@@ -183,7 +183,7 @@ async function enterLobby() {
     };
 
     currentPlayerId = localStorage.getItem("playerId");
-    
+
     if (currentPlayerId) {
         const { error } = await supabaseClient
             .from("players")
@@ -1089,3 +1089,18 @@ async function finishBattleCleanup() {
 
     location.reload(true);
 }
+
+window.addEventListener("beforeunload", () => {
+    const playerId = localStorage.getItem("playerId");
+
+    if (!playerId) return;
+
+    fetch(`${SUPABASE_URL}/rest/v1/players?id=eq.${playerId}`, {
+        method: "DELETE",
+        keepalive: true,
+        headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`
+        }
+    });
+});
