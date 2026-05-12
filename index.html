@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PokéBattle Online</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <main class="app">
+
+        <section class="start-screen" id="startScreen">
+            <div class="game-card">
+                <h1>PokéBattle Online</h1>
+                <p>Monte seu time e desafie outros treinadores.</p>
+
+                <div class="form-group">
+                    <label for="playerName">Nome do treinador</label>
+                    <input type="text" id="playerName" placeholder="Ex: Viny" maxlength="15" />
+                </div>
+
+                <button id="enterButton">Entrar</button>
+                <small id="errorMessage"></small>
+            </div>
+        </section>
+
+        <section class="team-screen hidden" id="teamScreen">
+            <div class="game-card">
+
+                <h2>Escolha seu time</h2>
+
+                <p id="trainerName"></p>
+
+                <div class="team-panel">
+
+                    <h3>Seu Time</h3>
+
+                    <div class="selected-team" id="selectedTeam"></div>
+
+                    <button id="continueButton" disabled>
+                        Ir para o Lobby
+                    </button>
+
+                </div>
+
+                <div class="search-box">
+                    <input type="text" id="pokemonSearch" placeholder="Buscar Pokémon..." />
+                </div>
+
+                <div class="pokemon-grid" id="pokemonGrid"></div>
+
+            </div>
+        </section>
+        <section class="lobby-screen hidden" id="lobbyScreen">
+            <div class="game-card">
+                <h2>Lobby Online</h2>
+                <p id="lobbyTrainerName"></p>
+
+                <h3>Treinadores disponíveis</h3>
+
+                <div class="players-list" id="playersList"></div>
+            </div>
+        </section>
+        <section class="battle-screen hidden" id="battleScreen">
+            <div class="battle-card">
+
+                <div class="battle-top">
+                    <div class="enemy-info">
+                        <h3 id="enemyName">Oponente</h3>
+                        <div class="hp-bar">
+                            <div class="hp-fill" id="enemyHpBar"></div>
+                        </div>
+                    </div>
+
+                    <img id="enemyPokemonSprite" class="pokemon-battle-sprite enemy-sprite" />
+                </div>
+
+                <div class="battle-bottom">
+                    <img id="playerPokemonSprite" class="pokemon-battle-sprite player-sprite" />
+
+                    <div class="player-info">
+                        <h3 id="playerBattleName">Você</h3>
+                        <div class="hp-bar">
+                            <div class="hp-fill" id="playerHpBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="battle-text-box">
+                    <p id="battleMessage">A batalha começou!</p>
+
+                    <button id="attackButton">
+                        Atacar
+                    </button>
+                </div>
+
+            </div>
+        </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
