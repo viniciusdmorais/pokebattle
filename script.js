@@ -1,3 +1,19 @@
+const sounds = {
+
+    battleTheme: new Audio("assets/audio/battle-theme.mp3"),
+
+    attack: new Audio("assets/audio/attack.mp3"),
+
+    switchPokemon: new Audio("assets/audio/pokemon-switch.mp3"),
+
+    victory: new Audio("assets/audio/victory.mp3"),
+
+    defeat: new Audio("assets/audio/defeat.mp3")
+};
+
+sounds.battleTheme.loop = true;
+sounds.battleTheme.volume = 0.35;
+
 const SUPABASE_URL = "https://ydnaqebwlhuovhlmtqfq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_5vKUrs9n04Ph1ObyK9rRrA__lk9qFKH";
 
@@ -563,7 +579,7 @@ async function openBattleScreen(battleId) {
     teamScreen.classList.add("hidden");
     startScreen.classList.add("hidden");
     battleScreen.classList.remove("hidden");
-
+    playSound(sounds.battleTheme);
 
     const isPlayer1 = battle.player1_id === currentPlayerId;
 
@@ -767,6 +783,7 @@ async function useMove(move) {
     }
 
     playAttackAnimation();
+    playSound(sounds.attack);
     let newPlayer1Hp = currentBattle.player1_hp;
     let newPlayer2Hp = currentBattle.player2_hp;
 
@@ -854,6 +871,7 @@ async function useMove(move) {
 
             newPlayer1Hp =
                 calculatePokemonHp(nextPokemon);
+            playSound(sounds.switchPokemon);
 
             battleMessage.textContent =
                 `${capitalize(nextPokemon.name)} entrou na batalha!`;
@@ -874,7 +892,7 @@ async function useMove(move) {
 
             newPlayer2Hp =
                 calculatePokemonHp(nextPokemon);
-
+            playSound(sounds.switchPokemon);
             battleMessage.textContent =
                 `${capitalize(nextPokemon.name)} entrou na batalha!`;
         }
@@ -973,9 +991,17 @@ function listenBattleRealtime(battleId) {
 
                 if (player1Lost) {
                     battleMessage.textContent = `${currentBattle.player2_name} venceu!`;
-                    enemyHpBar.style.width = currentBattle.player2_id === currentPlayerId ? "100%" : enemyHpBar.style.width;
-                    playerHpBar.style.width = currentBattle.player1_id === currentPlayerId ? "0%" : playerHpBar.style.width;
+
+                    sounds.battleTheme.pause();
+
+                    if (currentBattle.player2_id === currentPlayerId) {
+                        playSound(sounds.victory);
+                    } else {
+                        playSound(sounds.defeat);
+                    }
+
                     disableMoveButtons();
+
                     setTimeout(() => {
                         finishBattleCleanup();
                     }, 3000);
@@ -983,9 +1009,17 @@ function listenBattleRealtime(battleId) {
 
                 if (player2Lost) {
                     battleMessage.textContent = `${currentBattle.player1_name} venceu!`;
-                    enemyHpBar.style.width = currentBattle.player1_id === currentPlayerId ? "100%" : enemyHpBar.style.width;
-                    playerHpBar.style.width = currentBattle.player2_id === currentPlayerId ? "0%" : playerHpBar.style.width;
+
+                    sounds.battleTheme.pause();
+
+                    if (currentBattle.player1_id === currentPlayerId) {
+                        playSound(sounds.victory);
+                    } else {
+                        playSound(sounds.defeat);
+                    }
+
                     disableMoveButtons();
+
                     setTimeout(() => {
                         finishBattleCleanup();
                     }, 3000);
@@ -1281,6 +1315,8 @@ async function startCpuBattle() {
     if (currentBattle.current_turn === "cpu") {
         setTimeout(cpuTurn, 1200);
     }
+
+    playSound(sounds.battleTheme);
 }
 
 async function createCpuTeam() {
@@ -1368,6 +1404,7 @@ function executeLocalAttack(attacker, move) {
     }
 
     playAttackAnimation();
+    playSound(sounds.attack);
 
     const typeMultiplier = getTypeMultiplier(move.type, enemyPokemon.types);
 
@@ -1410,6 +1447,7 @@ function executeLocalAttack(attacker, move) {
     battleMessage.textContent = message;
 
     handleLocalKo();
+
     updateBattleHP(currentBattle);
     updateBattlePokemonDisplay(currentBattle);
 }
@@ -1457,6 +1495,9 @@ function handleLocalKo() {
             battleMessage.textContent = "CPU venceu!";
             disableMoveButtons();
 
+            sounds.battleTheme.pause();
+            playSound(sounds.defeat);
+
             setTimeout(() => {
                 resetGame();
             }, 3500);
@@ -1468,6 +1509,7 @@ function handleLocalKo() {
             currentBattle.player1_team[currentBattle.player1_active_index];
 
         currentBattle.player1_hp = calculatePokemonHp(nextPokemon);
+        playSound(sounds.switchPokemon);
     }
 
     if (currentBattle.player2_hp <= 0) {
@@ -1479,7 +1521,8 @@ function handleLocalKo() {
                 `${currentBattle.player1_name} venceu!`;
 
             disableMoveButtons();
-
+            sounds.battleTheme.pause();
+            playSound(sounds.victory);
             setTimeout(() => {
                 resetGame();
             }, 3500);
@@ -1491,10 +1534,13 @@ function handleLocalKo() {
             currentBattle.player2_team[currentBattle.player2_active_index];
 
         currentBattle.player2_hp = calculatePokemonHp(nextPokemon);
+        playSound(sounds.switchPokemon);
     }
 }
 
 function resetGame() {
+    sounds.battleTheme.pause();
+    sounds.battleTheme.currentTime = 0;
 
     currentBattle = null;
     activeBattleId = null;
@@ -1518,4 +1564,13 @@ function resetGame() {
     selectedTeam.innerHTML = "";
 
     continueButton.disabled = true;
+}
+
+function playSound(sound) {
+
+    if (!sound) return;
+
+    sound.currentTime = 0;
+
+    sound.play().catch(() => { });
 }
