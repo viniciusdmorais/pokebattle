@@ -435,3 +435,12 @@ button:hover {
     gap: 10px;
   }
 }
+
+.cpu-button {
+  margin-top: 10px;
+  background: #ef5350;
+}
+
+.cpu-button:hover {
+  background: #e53935;
+}
