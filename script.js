@@ -228,7 +228,8 @@ async function enterLobby() {
     const playerData = {
         name: playerName,
         status: "online",
-        team: playerTeam
+        team: playerTeam,
+        last_seen: new Date().toISOString()
     };
 
     currentPlayerId = localStorage.getItem("playerId");
@@ -286,13 +287,17 @@ async function enterLobby() {
     listenPlayersRealtime();
     listenBattleInvites();
     listenAcceptedBattles();
+    setInterval(updatePresence, 10000);
 }
 
 async function loadOnlinePlayers() {
+    const activeLimit =
+        new Date(Date.now() - 30000).toISOString();
+
     const { data, error } = await supabaseClient
         .from("players")
         .select("*")
-        .eq("status", "online")
+        .gt("last_seen", activeLimit)
         .order("created_at", { ascending: false });
 
     if (error) {
@@ -1615,4 +1620,26 @@ async function cleanupOldSession() {
     }
 
     localStorage.clear();
+}
+
+async function updatePresence() {
+
+    if (!currentPlayerId) return;
+
+    try {
+
+        await supabaseClient
+            .from("players")
+            .update({
+                last_seen: new Date().toISOString()
+            })
+            .eq("id", currentPlayerId);
+
+    } catch (error) {
+
+        console.error(
+            "Erro atualizando presença:",
+            error
+        );
+    }
 }
