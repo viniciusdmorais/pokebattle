@@ -93,7 +93,7 @@ async function loadPokemons() {
     pokemonGrid.innerHTML = "<p>Carregando Pokémon...</p>";
 
     try {
-        const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=151");
+        const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=1025");
         const data = await response.json();
 
         allPokemons = data.results.map((pokemon, index) => {
