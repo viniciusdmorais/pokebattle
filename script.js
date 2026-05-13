@@ -59,6 +59,8 @@ let currentPlayerId = localStorage.getItem("playerId");
 let currentBattle = null;
 let activeBattleId = null;
 
+cleanupOldSession();
+
 enterButton.addEventListener("click", () => {
     const playerName = playerNameInput.value.trim();
 
@@ -1573,4 +1575,44 @@ function playSound(sound) {
     sound.currentTime = 0;
 
     sound.play().catch(() => { });
+}
+
+async function cleanupOldSession() {
+
+    const oldPlayerId =
+        localStorage.getItem("playerId");
+
+    if (!oldPlayerId) return;
+
+    try {
+
+        await supabaseClient
+            .from("battle_invites")
+            .delete()
+            .or(
+                `from_player_id.eq.${oldPlayerId},to_player_id.eq.${oldPlayerId}`
+            );
+
+        await supabaseClient
+            .from("battles")
+            .delete()
+            .or(
+                `player1_id.eq.${oldPlayerId},player2_id.eq.${oldPlayerId}`
+            );
+
+        await supabaseClient
+            .from("players")
+            .delete()
+            .eq("id", oldPlayerId);
+
+    } catch (error) {
+
+        console.error(
+            "Erro limpando sessão antiga:",
+            error
+        );
+
+    }
+
+    localStorage.clear();
 }
