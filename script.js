@@ -602,6 +602,26 @@ function capitalize(text) {
 }
 
 function updateBattleHP(battle) {
+    if (battle.mode === "cpu") {
+        const myPokemon = battle.player1_team[battle.player1_active_index];
+        const enemyPokemon = battle.player2_team[battle.player2_active_index];
+
+        if (!myPokemon || !enemyPokemon) return;
+
+        const myMaxHp = calculatePokemonHp(myPokemon);
+        const enemyMaxHp = calculatePokemonHp(enemyPokemon);
+
+        const myHpPercent = Math.max((battle.player1_hp / myMaxHp) * 100, 0);
+        const enemyHpPercent = Math.max((battle.player2_hp / enemyMaxHp) * 100, 0);
+
+        playerHpBar.style.width = `${myHpPercent}%`;
+        enemyHpBar.style.width = `${enemyHpPercent}%`;
+
+        playerHpBar.style.background = getHpColor(myHpPercent);
+        enemyHpBar.style.background = getHpColor(enemyHpPercent);
+
+        return;
+    }
     const isPlayer1 = battle.player1_id === currentPlayerId;
 
     const myTeam = isPlayer1 ? battle.player1_team : battle.player2_team;
@@ -1077,6 +1097,27 @@ function calculatePokemonHp(pokemon) {
 }
 
 function updateBattlePokemonDisplay(battle) {
+    if (battle.mode === "cpu") {
+        const myPokemon = battle.player1_team[battle.player1_active_index];
+        const enemyPokemon = battle.player2_team[battle.player2_active_index];
+
+        if (!myPokemon || !enemyPokemon) return;
+
+        playerBattleName.textContent =
+            `${battle.player1_name} - ${capitalize(myPokemon.name)}`;
+
+        enemyName.textContent =
+            `${battle.player2_name} - ${capitalize(enemyPokemon.name)}`;
+
+        playerPokemonSprite.src =
+            `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${myPokemon.id}.png`;
+
+        enemyPokemonSprite.src = enemyPokemon.image;
+
+        renderMoveButtons(myPokemon.moves);
+
+        return;
+    }
     const isPlayer1 = battle.player1_id === currentPlayerId;
 
     const myTeam = isPlayer1 ? battle.player1_team : battle.player2_team;
@@ -1256,20 +1297,6 @@ async function createCpuTeam() {
     return cpuTeam;
 }
 
-async function createCpuTeam() {
-    const shuffled = [...allPokemons].sort(() => Math.random() - 0.5);
-    const selected = shuffled.slice(0, 6);
-
-    const cpuTeam = [];
-
-    for (const pokemon of selected) {
-        const detailedPokemon = await getPokemonDetails(pokemon);
-        cpuTeam.push(detailedPokemon);
-    }
-
-    return cpuTeam;
-}
-
 function useMoveAgainstCpu(move) {
     if (!currentBattle) return;
 
@@ -1280,30 +1307,14 @@ function useMoveAgainstCpu(move) {
 
     executeLocalAttack("player", move);
 
-    if (currentBattle.status !== "finished") {
-        currentBattle.current_turn = "cpu";
+    if (currentBattle.status === "finished") return;
+
+    currentBattle.current_turn = "cpu";
+
+    setTimeout(() => {
         openLocalBattleScreen();
-
-        setTimeout(cpuTurn, 1200);
-    }
-}
-
-function useMoveAgainstCpu(move) {
-    if (!currentBattle) return;
-
-    if (currentBattle.current_turn !== "player") {
-        battleMessage.textContent = "Não é seu turno.";
-        return;
-    }
-
-    executeLocalAttack("player", move);
-
-    if (currentBattle.status !== "finished") {
-        currentBattle.current_turn = "cpu";
-        openLocalBattleScreen();
-
-        setTimeout(cpuTurn, 1200);
-    }
+        setTimeout(cpuTurn, 900);
+    }, 900);
 }
 
 function cpuTurn() {
@@ -1317,10 +1328,13 @@ function cpuTurn() {
 
     executeLocalAttack("cpu", randomMove);
 
-    if (currentBattle.status !== "finished") {
-        currentBattle.current_turn = "player";
+    if (currentBattle.status === "finished") return;
+
+    currentBattle.current_turn = "player";
+
+    setTimeout(() => {
         openLocalBattleScreen();
-    }
+    }, 900);
 }
 
 function executeLocalAttack(attacker, move) {
@@ -1352,6 +1366,8 @@ function executeLocalAttack(attacker, move) {
             `${capitalize(myPokemon.name)} usou ${capitalizeMoveName(move.name)}, mas errou!`;
         return;
     }
+
+    playAttackAnimation();
 
     const typeMultiplier = getTypeMultiplier(move.type, enemyPokemon.types);
 
@@ -1402,12 +1418,12 @@ function openLocalBattleScreen() {
 
     const myPokemon =
         currentBattle.player1_team[
-            currentBattle.player1_active_index
+        currentBattle.player1_active_index
         ];
 
     const enemyPokemon =
         currentBattle.player2_team[
-            currentBattle.player2_active_index
+        currentBattle.player2_active_index
         ];
 
     playerBattleName.textContent =
@@ -1440,6 +1456,11 @@ function handleLocalKo() {
             currentBattle.status = "finished";
             battleMessage.textContent = "CPU venceu!";
             disableMoveButtons();
+
+            setTimeout(() => {
+                resetGame();
+            }, 3500);
+
             return;
         }
 
@@ -1454,8 +1475,15 @@ function handleLocalKo() {
 
         if (currentBattle.player2_active_index >= currentBattle.player2_team.length) {
             currentBattle.status = "finished";
-            battleMessage.textContent = `${currentBattle.player1_name} venceu!`;
+            battleMessage.textContent =
+                `${currentBattle.player1_name} venceu!`;
+
             disableMoveButtons();
+
+            setTimeout(() => {
+                resetGame();
+            }, 3500);
+
             return;
         }
 
@@ -1464,4 +1492,30 @@ function handleLocalKo() {
 
         currentBattle.player2_hp = calculatePokemonHp(nextPokemon);
     }
+}
+
+function resetGame() {
+
+    currentBattle = null;
+    activeBattleId = null;
+
+    playerTeam = [];
+
+    localStorage.clear();
+
+    battleScreen.classList.add("hidden");
+    lobbyScreen.classList.add("hidden");
+    teamScreen.classList.add("hidden");
+
+    startScreen.classList.remove("hidden");
+
+    battleMessage.textContent = "A batalha começou!";
+
+    movesBox.innerHTML = "";
+
+    playersList.innerHTML = "";
+
+    selectedTeam.innerHTML = "";
+
+    continueButton.disabled = true;
 }
